@@ -41,13 +41,16 @@ def wait_for_service(url):
         time.sleep(0.2)
 
 
-def run_inference(inference_request):
+def run_inference(inference_request,prediction_id):
     '''
     Run inference on a request.
     '''
 
+    # 兼容cog, 需要支持迷瞪的场景, 并且回调里需要带上id来查询. 需要对input再包装一层
+    print(prediction_id)
+    print(inference_request)
 
-    response = cog_session.post(url=f'{LOCAL_URL}/predictions',
+    response = cog_session.put(url=f'{LOCAL_URL}/predictions/{prediction_id}',
                                 json=inference_request, timeout=600, headers={'Prefer':'respond-async'})
     print("实际发送的请求头:", response.request.headers)
 
@@ -61,8 +64,14 @@ def handler(event):
     '''
     This is the handler function that will be called by the serverless.
     '''
-    print(event["input"])
-    json = run_inference({"input": event["input"]})
+    json = run_inference(
+        {
+            "input": event["input"]["cog"],
+            "webhook": event["input"]["webhook"],
+            "webhook_events_filter": event["input"]["webhook_events_filter"],
+        },
+        event["input"]["prediction_id"]
+    )
     print(json)
     return json
 
