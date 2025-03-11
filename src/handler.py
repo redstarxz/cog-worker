@@ -57,10 +57,11 @@ def handler(event):
     '''
     This is the handler function that will be called by the serverless.
     '''
+    print(event["input"])
 
     json = run_inference({"input": event["input"]})
-
-    return json["output"]
+    print(json)
+    return json
 
 
 if __name__ == "__main__":
