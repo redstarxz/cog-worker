@@ -14,7 +14,7 @@ cog_session.mount('http://', HTTPAdapter(max_retries=retries))
 
 # ----------------------------- Start API Service ---------------------------- #
 # Call "python -m cog.server.http" in a subprocess to start the API service.
-subprocess.Popen(["python", "-m", "cog.server.http"])
+subprocess.Popen(["python", "-m", "cog.server.http", "--upload-url", "https://upload.10xi.top/upload"])
 
 
 # ---------------------------------------------------------------------------- #
