@@ -41,11 +41,13 @@ def wait_for_service(url):
         time.sleep(0.2)
 
 
-def run_inference(inference_request,prediction_id):
+def run_inference(inference_request):
     '''
     Run inference on a request.
     '''
-    response = cog_session.put(url=f'{LOCAL_URL}/predictions/{prediction_id}',
+
+
+    response = cog_session.post(url=f'{LOCAL_URL}/predictions',
                                 json=inference_request, timeout=600, headers={'Prefer':'respond-async'})
     print("实际发送的请求头:", response.request.headers)
 
@@ -60,8 +62,7 @@ def handler(event):
     This is the handler function that will be called by the serverless.
     '''
     print(event["input"])
-    prediction_id = event["prediction_id"]
-    json = run_inference({"input": event["input"]}, prediction_id)
+    json = run_inference({"input": event["input"]})
     print(json)
     return json
 
