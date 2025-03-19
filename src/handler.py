@@ -46,7 +46,7 @@ def run_inference(inference_request):
     Run inference on a request.
     '''
     response = cog_session.post(url=f'{LOCAL_URL}/predictions',
-                                json=inference_request, timeout=600)
+                                json=inference_request, timeout=600,  headers={'Prefer':'respond-async'})
     return response.json()
 
 
