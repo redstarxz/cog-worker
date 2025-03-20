@@ -97,7 +97,7 @@ def handler(event):
     print(event["input"])
     json = run_inference({"input": event["input"]})
     print(json)
-    return json["output"]
+    return json
 
 
 if __name__ == "__main__":
