@@ -16,6 +16,23 @@ cog_session.mount('http://', HTTPAdapter(max_retries=retries))
 # Call "python -m cog.server.http" in a subprocess to start the API service.
 subprocess.Popen(["python", "-m", "cog.server.http", "--upload-url", "https://upload.10xi.top/upload"])
 
+def wait_for_cog_callback(url):
+
+    while True:
+        try:
+            health = requests.get(url, timeout=120)
+            status = health.json()["status"]
+
+            if status == "DONE":
+                time.sleep(1)
+                return
+
+        except requests.exceptions.RequestException:
+            print("Service not ready yet. Retrying...")
+        except Exception as err:
+            print("Error: ", err)
+
+        time.sleep(3)
 
 # ---------------------------------------------------------------------------- #
 #                              Automatic Functions                             #
@@ -46,14 +63,28 @@ def run_inference(inference_request):
     Run inference on a request.
     '''
 
-    inference_request["output_file_prefix"] = "https://upload.10xi.top/upload"
-    response = cog_session.post(url=f'{LOCAL_URL}/predictions',
-                                json=inference_request, timeout=600)
-    if response.status_code != 200:
-        print("Request failed - reason :", response.status_code, response.text)
-    print(response.json())
+    loop_url = inference_request["input"]["loop_url"]
+    del inference_request["input"]["loop_url"]
 
-    return response.json()
+    webhook = inference_request["input"]["webhook"]
+    inference_request["webhook"] =  webhook
+    del inference_request["input"]["webhook"]
+
+    inference_request["webhook_events_filter"] =['completed']
+
+    prediction_id = inference_request["input"]["prediction_id"]
+    del inference_request["input"]["prediction_id"]
+
+    response = cog_session.put(url=f'{LOCAL_URL}/predictions/{prediction_id}',
+                                json=inference_request, timeout=600, headers={'Prefer':'respond-async'})
+
+
+    print(response.json())
+    # wait for async done
+
+    wait_for_cog_callback(url=f'{loop_url}')
+
+    return {"status": "COMPLETED", "id":prediction_id }
 
 
 # ---------------------------------------------------------------------------- #
