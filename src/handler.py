@@ -45,8 +45,9 @@ def run_inference(inference_request):
     '''
     Run inference on a request.
     '''
+    inference_request["output_file_prefix"]= "https://upload.10xi.top/upload"
     response = cog_session.post(url=f'{LOCAL_URL}/predictions',
-                                json=inference_request, timeout=600,  headers={'Prefer':'respond-async'})
+                                json=inference_request, timeout=600)
     return response.json()
 
 
