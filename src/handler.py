@@ -45,11 +45,15 @@ def run_inference(inference_request):
     '''
     Run inference on a request.
     '''
-    inference_request["output_file_prefix"]= "https://upload.10xi.top/upload"
+
+    inference_request["output_file_prefix"] = "https://upload.10xi.top/upload"
     response = cog_session.post(url=f'{LOCAL_URL}/predictions',
                                 json=inference_request, timeout=600)
-    print(response)
-    return response
+    if response.status_code != 200:
+        print("Request failed - reason :", response.status_code, response.text)
+    print(response.json())
+
+    return response.json()
 
 
 # ---------------------------------------------------------------------------- #
@@ -62,7 +66,7 @@ def handler(event):
     print(event["input"])
     json = run_inference({"input": event["input"]})
     print(json)
-    return json
+    return json["output"]
 
 
 if __name__ == "__main__":
